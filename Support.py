@@ -8,18 +8,21 @@ class Chain:
         self.quality: int = quality
         self.is_safe: bool = False
 
-    def expand_chain(self, hotel: tuple[int, int]):
-        self.hotels.append(hotel)
-        self.size = len(self.hotels)
-        if len(self.hotels) == 11:
-            self.is_safe = True
+    def expand_chain(self, *hotels: tuple[int, int]):
+        for hotel in hotels:
+            self.hotels.append(hotel)
+            self.size = len(self.hotels)
+            if len(self.hotels) == 11:
+                self.is_safe = True
 
     def purchase_stock(self, amt: int = 1):
         self.stock_amt -= amt
 
+    def sell_stock(self, amt: int = 1):
+        self.stock_amt += amt
+
     def reset_chain(self):
         self.hotels = []
-        self.stock_amt = 25
         self.size = len(self.hotels)
 
 
@@ -27,13 +30,13 @@ class Board:
     # The Acquire Board Class
 
     def __init__(self):
-        self.board: list[list[bool]] = [[True] * 12] * 9
+        self.board: list[list[bool]] = [[False] * 12] * 9
         self.chains: list[Chain] = []
 
     def place_tile(self, tile: tuple[int, int]) -> list[Chain] | None:
         # Assumes that the tile is a legal move. ie doesn't cause mergers between sufficiently sized chains.
         # Returns true if the tile causes a merger.
-        assert not self.board[tile[0]][tile[1]]
+        assert not self.board[tile[0]][tile[1]], f"Tile attempted to be placed was {tile}"
         self.board[tile[0]][tile[1]] = True
 
         if self.does_initiate_merger(tile):
@@ -63,3 +66,10 @@ class Board:
             if tile in chain.hotels:
                 return tile
         return None
+
+    def display_board(self):
+        for row in self.board:
+            row_string = ""
+            for tile in row:
+                row_string += '* ' if tile else '_ '
+            print(row_string)

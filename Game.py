@@ -41,21 +41,42 @@ class Game:
         self.tiles.remove(tile)
 
     def turn(self, player):
+        self.board.display_board()
         tile = player.place_tile()
         chains = self.board.place_tile(tile)
-        if chains is not None:
+        if None not in chains:
             #Merger
+            print(chains)
             self.merge(chains, player)
+        self.board.display_board()
 
     def merge(self, chains: list[Chain], merger_maker: Player):
-        #TODO
         sorted_chains = reversed(sorted(chains, key=lambda x: x.size)) # large to small chain size
-        for i, chain in enumerate(sorted_chains):
-            if i == 0:
-                continue
-            if chain.size == sorted_chains[i-1].size:
-                result = merger_maker.choose_defunct_chain(sorted_chains[i-1], chain)
+        merge_order: list[Chain] = []
+        groups = []
+        for chain in sorted_chains:
+            if not groups or groups[-1][0].size != chain.size:
+                groups.append([chain])
+            else:
+                groups[-1].append(chain)
 
+        for chain_group in groups:
+            merge_order.append(merger_maker.choose_merge_order(chain_group))
+
+        acquirer = merge_order[0]
+        for defunct_chain in merge_order[1:]:
+            self.award_bonuses(defunct_chain)
+
+            index = self.players.index(merger_maker)
+            for player in self.players[index:] + self.players[:index]:
+                player.dispose_stocks(defunct_chain, acquirer)
+
+            acquirer.expand_chain(*defunct_chain.hotels)
+            defunct_chain.reset_chain()
+
+    def award_bonuses(self, defunct_chain: Chain):
+        #TODO
+        return None
 
     def end_game(self):
         #TODO
