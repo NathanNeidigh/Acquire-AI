@@ -17,13 +17,13 @@ class Player:
             players_tiles += string.ascii_uppercase[tile[0]]
             players_tiles += str(tile[1] + 1)
         print(f"You, {self.name} have the following tiles: ", players_tiles[2:])
-        tile = input("What tile do you want to place? ")
-        if (string.ascii_uppercase.index(tile[0]), int(tile[1:]) - 1) not in self.tiles:
-            print("Not valid input: ", tile)
+        tile_str = input("What tile do you want to place? ")
+        if (string.ascii_uppercase.index(tile_str[0]), int(tile_str[1:]) - 1) not in self.tiles:
+            print("Not valid input: ", tile_str)
             exit(-1)
 
-        self.tiles.remove((string.ascii_uppercase.index(tile[0]), int(tile[1]) - 1))
-        return (string.ascii_uppercase.index(tile[0]), int(tile[1]))
+        self.tiles.remove((string.ascii_uppercase.index(tile_str[0]), int(tile_str[1:]) - 1))
+        return string.ascii_uppercase.index(tile_str[0]), int(tile_str[1:]) - 1
 
     def choose_merge_order(self, merged_chains: list[Chain]):
         # TODO

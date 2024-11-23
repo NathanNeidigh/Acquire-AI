@@ -30,23 +30,26 @@ class Board:
     # The Acquire Board Class
 
     def __init__(self):
-        self.board: list[list[bool]] = [[False] * 12] * 9
+        self.board: list[list[bool]] = [[], [], [], [], [], [], [], [], [], [], [], []]
+        for i in range(12):
+            for j in range(9):
+                self.board[i].append(False)
         self.chains: list[Chain] = []
 
-    def place_tile(self, tile: tuple[int, int]) -> list[Chain] | None:
+    def place_tile(self, tile: tuple[int, int]) -> list[Chain] | bool:
         # Assumes that the tile is a legal move. ie doesn't cause mergers between sufficiently sized chains.
-        # Returns true if the tile causes a merger.
+        # Returns true if the tile creates a chain .
         assert not self.board[tile[0]][tile[1]], f"Tile attempted to be placed was {tile}"
-        self.board[tile[0]][tile[1]] = True
+        self.board[tile[1]][tile[0]] = True
 
-        if self.does_initiate_merger(tile):
-            chains: list[Chain] = self.chains_adjacent_to(tile)
-            return chains
-        return None
-
-    def does_initiate_merger(self, tile) -> bool:
         chains: list[Chain] = self.chains_adjacent_to(tile)
-        return False if chains is None else True
+        if chains is not None:
+            return chains
+        return False
+
+    def tiles_adjacent_to(self, tile: tuple[int, int]):
+        # TODO
+        return None
 
     def chains_adjacent_to(self, tile: tuple[int, int]) -> list[Chain] | None:
         chains = []
@@ -67,9 +70,10 @@ class Board:
                 return tile
         return None
 
-    def display_board(self):
+    def __str__(self):
+        board_str = ""
         for row in self.board:
-            row_string = ""
+            board_str += '\n'
             for tile in row:
-                row_string += '* ' if tile else '_ '
-            print(row_string)
+                board_str += '* ' if tile else '_ '
+        return board_str[1:-1]

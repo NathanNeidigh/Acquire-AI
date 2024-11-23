@@ -41,14 +41,16 @@ class Game:
         self.tiles.remove(tile)
 
     def turn(self, player):
-        self.board.display_board()
+        print(self.board)
         tile = player.place_tile()
+        print(f"{player.name} placed ", tile)
         chains = self.board.place_tile(tile)
-        if None not in chains:
+        if chains:
             #Merger
             print(chains)
+            print("Oh NOOOOOOOO")
             self.merge(chains, player)
-        self.board.display_board()
+        print(self.board)
 
     def merge(self, chains: list[Chain], merger_maker: Player):
         sorted_chains = reversed(sorted(chains, key=lambda x: x.size)) # large to small chain size
