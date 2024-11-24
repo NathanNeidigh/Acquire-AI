@@ -25,6 +25,38 @@ class Chain:
         self.hotels = []
         self.size = len(self.hotels)
 
+    def merge_chain(self, defunct_chain: 'Chain'):
+        self.hotels.extend(defunct_chain.hotels)
+        self.size = len(self.hotels)
+        if self.size >= 11:
+            self.is_safe = True
+        
+        defunct_chain.reset_chain()
+
+    def is_tile_in_chain(self, tile: tuple[int, int]) -> bool:
+        return tile in self.hotels
+    
+    def calculate_value(self) -> int:
+        cost = 200
+        if self.size > 41:
+            cost = 1_000
+        elif self.size > 31:
+            cost = 900
+        elif self.size > 21:
+            cost = 800
+        elif self.size > 11:
+            cost = 700
+        elif self.size > 6:
+            cost = 600
+        elif self.size > 3:
+            cost = 500
+        elif self.size > 2:
+            cost = 300
+        return cost + 100 * self.quality
+
+    def __str__(self):
+        return f"Chain(name={self.name}, size={self.size}, quality={self.quality}, is_safe={self.is_safe})"
+
 
 class Board:
     # The Acquire Board Class
@@ -48,27 +80,41 @@ class Board:
         return False
 
     def tiles_adjacent_to(self, tile: tuple[int, int]):
-        # TODO
-        return None
+        adjacent_tiles = []
+        if tile[0] - 1 >= 0:
+            adjacent_tiles.append((tile[0] - 1, tile[1]))
+        if tile[0] + 1 < len(self.board):
+            adjacent_tiles.append((tile[0] + 1, tile[1]))
+        if tile[1] - 1 >= 0:
+            adjacent_tiles.append((tile[0], tile[1] - 1))
+        if tile[1] + 1 < len(self.board[0]):
+            adjacent_tiles.append((tile[0], tile[1] + 1))
+        return adjacent_tiles
 
     def chains_adjacent_to(self, tile: tuple[int, int]) -> list[Chain] | None:
         chains = []
-        if tile[0] - 1 > 0 and self.board[tile[0] - 1][tile[1]]:
-            chains.append(self.chain_from_tile((tile[0] - 1, tile[1])))
-        if tile[0] + 1 < len(self.board) and self.board[tile[0] + 1][tile[1]]:
-            chains.append(self.chain_from_tile((tile[0] + 1, tile[1])))
-        if tile[1] - 1 > 0 and self.board[tile[0]][tile[1] - 1]:
-            chains.append(self.chain_from_tile((tile[0], tile[1] - 1)))
-        if tile[1] + 1 < len(self.board[0]) and self.board[tile[0]][tile[1] + 1]:
-            chains.append(self.chain_from_tile((tile[0], tile[1] + 1)))
-
-        return chains if chains != [] else None
+        for adj_tile in self.tiles_adjacent_to(tile):
+            chain = self.chain_from_tile(adj_tile)
+            chains.append(chain)
+        return chains if chains else None
 
     def chain_from_tile(self, tile) -> Chain | None:
         for chain in self.chains:
             if tile in chain.hotels:
-                return tile
+                return chain
         return None
+    
+    def create_chain(self, name: str, quality: int, initial_tile: tuple[int, int]):
+        new_chain = Chain(name, quality)
+        new_chain.expand_chain(initial_tile)
+        self.chains.append(new_chain)
+
+    def merge_chains(self, main_chain: Chain, defunct_chain: Chain):
+        main_chain.merge_chain(defunct_chain)
+        self.chains.remove(defunct_chain)
+
+    def is_tile_in_any_chain(self, tile: tuple[int, int]) -> bool:
+        return any(chain.is_tile_in_chain(tile) for chain in self.chains)
 
     def __str__(self):
         board_str = ""
